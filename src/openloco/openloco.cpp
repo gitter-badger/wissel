@@ -23,6 +23,7 @@
 #include "config.h"
 #include "date.h"
 #include "environment.h"
+#include "graphics/colours.h"
 #include "graphics/gfx.h"
 #include "industrymgr.h"
 #include "input.h"
@@ -43,6 +44,7 @@
 #include "ui.h"
 #include "ui/WindowManager.h"
 #include "utility/numeric.hpp"
+#include "viewportmgr.h"
 
 #pragma warning(disable : 4611) // interaction between '_setjmp' and C++ object destruction is non - portable
 
@@ -239,10 +241,38 @@ namespace openloco
         // with g1 alone and some objects?
     }
 
+    static loco_global<string_id, 0x0050A018> _mapTooltipFormatArguments;
+    static loco_global<company_id_t, 0x0050A040> _mapTooltipOwner;
+
+    static loco_global<char[256], 0x011367A0> _11367A0;
+    static loco_global<char[256], 0x011368A0> _11368A0;
+
+    static loco_global<int32_t, 0x0052339C> _52339C;
+    static loco_global<int8_t, 0x0052336E> _52336E; // bool
+
     // 0x004C57C0
-    static void initialise_viewports()
+    void initialise_viewports()
     {
-        call(0x004C57C0);
+        _mapTooltipFormatArguments = string_ids::null;
+        _mapTooltipOwner = company_id::null;
+
+        colour::init_colour_map();
+        ui::WindowManager::init();
+        ui::viewportmgr::init();
+
+        input::init();
+        input::init_mouse();
+
+        // rain-related
+        _52339C = -1;
+
+        // tooltip-related
+        _52336E = 0;
+
+        ui::textinput::cancel();
+
+        stringmgr::format_string(_11367A0, string_ids::label_button_ok);
+        stringmgr::format_string(_11368A0, string_ids::label_button_cancel);
     }
 
     static void initialise()
