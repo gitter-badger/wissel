@@ -96,7 +96,7 @@ namespace openloco::input::shortcuts
     // 004BF0B6
     void CloseAllFloatingWindows()
     {
-        // WindowManager::sub_4CF456();
+        WindowManager::closeAll();
     }
 
     // 0x4BF0BC
