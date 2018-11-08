@@ -41,6 +41,8 @@ namespace openloco::ui::WindowManager
         };
     };
 
+    static void sub_4C6A40(ui::window* window, ui::viewport* viewport, int16_t dX, int16_t dY);
+
     void init()
     {
         _windowsEnd = &_windows[0];
