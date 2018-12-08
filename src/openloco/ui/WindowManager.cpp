@@ -25,10 +25,15 @@ namespace openloco::ui::WindowManager
     static loco_global<int32_t, 0x00525330> _cursorWheel;
     static loco_global<window[12], 0x011370AC> _windows;
     static loco_global<window*, 0x0113D754> _windowsEnd;
+    static loco_global<uint16_t, 0x0050C19C> time_since_last_tick;
+    static loco_global<uint16_t, 0x0052334E> gWindowUpdateTicks;
+    static loco_global<WindowType, 0x00523364> _callingWindowType;
+    static loco_global<uint16_t, 0x0052338C> _tooltipNotShownTicks;
     static loco_global<uint16_t, 0x00523390> _toolWindowNumber;
     static loco_global<ui::WindowType, 0x00523392> _toolWindowType;
     static loco_global<uint16_t, 0x00523394> _toolWidgetIdx;
     static loco_global<uint32_t, 0x00525E28> _525E28;
+    static loco_global<uint32_t, 0x009DA3D4> _9DA3D4;
 
     struct WindowList
     {
@@ -121,16 +126,6 @@ namespace openloco::ui::WindowManager
                     }
                     window++;
                 }
-
-                return 0;
-            });
-
-        register_hook(
-            0x004C6202,
-            [](registers& regs) FORCE_ALIGN_ARG_POINTER -> uint8_t {
-                registers backup = regs;
-                allWheelInput();
-                regs = backup;
 
                 return 0;
             });
@@ -288,6 +283,15 @@ namespace openloco::ui::WindowManager
             });
 
         register_hook(
+            0x004C6118,
+            [](registers& regs) FORCE_ALIGN_ARG_POINTER -> uint8_t {
+                registers backup = regs;
+                update();
+                regs = backup;
+                return 0;
+            });
+
+        register_hook(
             0x004C96E7,
             [](registers& regs) FORCE_ALIGN_ARG_POINTER -> uint8_t {
                 registers backup = regs;
@@ -320,7 +324,61 @@ namespace openloco::ui::WindowManager
     // 0x004C6118
     void update()
     {
-        call(0x004C6118);
+        _tooltipNotShownTicks = _tooltipNotShownTicks + time_since_last_tick;
+        _9DA3D4 = _9DA3D4 + 1;
+        if (_9DA3D4 == 224 && ui::dirty_blocks_initialised())
+        {
+            if (_callingWindowType != WindowType::undefined)
+            {
+                _9DA3D4 = _9DA3D4 - 1;
+            }
+            else
+            {
+                // set_window_pos_wrapper();
+            }
+        }
+
+        if (!ui::dirty_blocks_initialised())
+        {
+            return;
+        }
+
+        if (!intro::is_active())
+        {
+            gfx::draw_dirty_blocks();
+        }
+
+        for (window& w : WindowList())
+        {
+            w.viewports_update_position();
+        }
+
+        // 1000 tick update
+        gWindowUpdateTicks = gWindowUpdateTicks + time_since_last_tick;
+        if (gWindowUpdateTicks >= 1000)
+        {
+            gWindowUpdateTicks = 0;
+            for (ui::window* w = _windowsEnd - 1; w >= _windows; w--)
+            {
+                w->call_6();
+            }
+        }
+
+        // Border flash invalidation
+        for (ui::window* w = _windowsEnd - 1; w >= _windows; w--)
+        {
+            if ((w->flags & window_flags::white_border_mask) != 0)
+            {
+                // TODO: Replace with countdown
+                w->flags -= window_flags::white_border_one;
+                if ((w->flags & window_flags::white_border_mask) != 0)
+                {
+                    w->invalidate();
+                }
+            }
+        }
+
+        allWheelInput();
     }
 
     // 0x004CE438
