@@ -66,14 +66,14 @@ namespace openloco::gfx
 
     struct point_t
     {
-        int16_t x;
-        int16_t y;
+        int32_t x;
+        int32_t y;
     };
 
     struct ui_size_t
     {
-        uint16_t width;
-        uint16_t height;
+        int32_t width;
+        int32_t height;
     };
 
     drawpixelinfo_t& screen_dpi();

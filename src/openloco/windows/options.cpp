@@ -2141,8 +2141,7 @@ namespace openloco::ui::options
         // 0x004BF833 (create_options_window)
         window = WindowManager::createWindowCentred(
             WindowType::options,
-            display::_window_size.width,
-            display::_window_size.height,
+            { display::_window_size.width, display::_window_size.height },
             0,
             &display::_events);
 
