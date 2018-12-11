@@ -13,6 +13,7 @@ namespace openloco::ui::WindowManager
     void setCurrentModalType(WindowType type);
     window* get(size_t index);
     size_t count();
+    int indexOf(window* window);
 
     void update();
     window* getMainWindow();
