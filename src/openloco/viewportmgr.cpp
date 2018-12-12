@@ -198,30 +198,30 @@ namespace openloco::ui::viewportmgr
                 continue;
 
             // Get intersection
-            auto _ax = std::max(rect.left, viewport->view_x);
-            auto _dx = std::min<int16_t>(rect.right, viewport->view_x + viewport->view_width);
-            auto _bx = std::max(rect.top, viewport->view_x);
-            auto _bp = std::min<int16_t>(rect.bottom, viewport->view_x + viewport->view_width);
+            auto left = std::max(rect.left, viewport->view_x);
+            auto right = std::min<int16_t>(rect.right, viewport->view_x + viewport->view_width);
+            auto top = std::max(rect.top, viewport->view_y);
+            auto bottom = std::min<int16_t>(rect.bottom, viewport->view_y + viewport->view_height);
 
             // offset rect by (negative) viewport origin
-            _ax -= viewport->view_x;
-            _dx -= viewport->view_y;
-            _bx -= viewport->view_x;
-            _bp -= viewport->view_y;
+            left -= viewport->view_x;
+            right -= viewport->view_x;
+            top -= viewport->view_y;
+            bottom -= viewport->view_y;
 
             // apply zoom
-            _ax = _ax >> viewport->zoom;
-            _dx = _dx >> viewport->zoom;
-            _bx = _bx >> viewport->zoom;
-            _bp = _bp >> viewport->zoom;
+            left = left >> viewport->zoom;
+            right = right >> viewport->zoom;
+            top = top >> viewport->zoom;
+            bottom = bottom >> viewport->zoom;
 
             // offset calculated area by viewport offset
-            _ax += viewport->x;
-            _dx += viewport->y;
-            _bx += viewport->x;
-            _bp += viewport->y;
+            left += viewport->x;
+            right += viewport->x;
+            top += viewport->y;
+            bottom += viewport->y;
 
-            gfx::set_dirty_blocks(_ax, _bx, _dx, _bp);
+            gfx::set_dirty_blocks(left, top, right, bottom);
         }
     }
 
